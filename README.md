@@ -83,8 +83,8 @@ optional arguments:
   --v4l                 cv2.VideoCapture with cv2.CAP_V4L
   -ax {0,1}, --axis {0,1}
                         Specify the axis when counting person horizontally or
-                        virtically (0: count horizontally(x-axis) , 1: count
-                        virtically (y-axis)
+                        vertically (0: count horizontally(x-axis) , 1: count
+                        vertically (y-axis)
   -g GRID, --grid GRID  Specify how many grid to divide frame. This is used to
                         define boundary area when the tracker counts person. 0
                         ~ 2 means not counting person. (range: 3 < max_grid)

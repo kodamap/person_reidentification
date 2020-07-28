@@ -33,7 +33,7 @@ def build_argparser():
     parser.add_argument(
         "-ax",
         "--axis",
-        help="Specify the axis when counting person horizontally or virtically (0: count horizontally(x-axis) , 1: count virtically (y-axis)",
+        help="Specify the axis when counting person horizontally or vertically (0: count horizontally(x-axis) , 1: count vertically (y-axis)",
         default=0,
         choices=[0, 1],
         type=int,

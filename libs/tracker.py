@@ -66,7 +66,7 @@ class Tracker:
     def _set_boundary(self, frame, grid):
         boundary0 = frame.shape[(np.abs(self.axis - 1))] // grid
         boundary1 = frame.shape[(np.abs(self.axis - 1))] - boundary0
-        # axis:0: virtical boundary line: x-axis
+        # axis:0: vertical boundary line: x-axis
         # axis:1  horizontal boundary line: y-axis
         if self.axis == 0:
             # 0: left side boundary 1:right side boundary
