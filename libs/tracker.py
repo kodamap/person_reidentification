@@ -366,6 +366,9 @@ class Tracker:
                 self.update_tracking(
                     person_id, feature_vecs[det_id].reshape(1, 256), boxes[det_id]
                 )
+                frame = self.person_is_matched(
+                    frame, person_id, boxes[det_id], similarity
+                )
             # 2. nothing to do when person is out of counter area
             elif not is_overlap:
                 # 3. apply minumum similarity threshold when a person is in the closest distance
@@ -386,11 +389,6 @@ class Tracker:
                     self.register_person_vec(
                         feature_vecs[det_id], self.prev_feature_vecs, boxes[det_id]
                     )
-
-            if similarity > sim_thld:
-                frame = self.person_is_matched(
-                    frame, person_id, boxes[det_id], similarity
-                )
 
         self.prev_feature_vecs = feature_vecs
         frame = self.draw_couter_stats(frame)

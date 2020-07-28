@@ -103,7 +103,7 @@ python app.py -i cam --no_v4l
 **example2** Specify video file with person counter
 
 ```py
-python app.py -i "Pexels Videos 1338590.mp4" --grid 10 
+python app.py -i P1033674_1920.mp4 --grid 10 
 ```
 
 
