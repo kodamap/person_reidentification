@@ -1,0 +1,114 @@
+.container-fluid {
+  text-align: center;
+}
+
+.navbar {
+  padding: .1rem 1rem !important;
+}
+
+.navbar-text {
+  display: inline-block;
+  padding: .5rem;
+}
+
+.btn-secondary:not(:disabled):not(.disabled).active, .btn-secondary:not(:disabled):not(.disabled):active, .show>.btn-secondary.dropdown-toggle {
+  color: #fff;
+  background-color: #007bff;
+  border-color: #4e555b;
+}
+
+#res {
+  margin: 5px;
+  background-color: rgb(171, 201, 240);
+  /*display:none;*/
+}
+
+.btn-group{
+  margin: 5px;
+}
+
+.modal-dialog.modal-notify.modal-dark .modal-header {
+  background-color: #343a40;
+}
+
+.modal-content {
+  position: relative;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  width: 80%;
+  pointer-events: auto;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid rgba(0,0,0,.2);
+  border-radius: .3rem;
+  outline: 0;
+}
+
+.lead {
+  font-size: 1.25rem;
+  font-weight: 300;
+  color: #f8f9fa;
+}
+
+.close {
+  float: right;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 1px 0 #fff;
+  opacity: .5;
+}
+
+.custom-file {
+  max-width: 20rem;
+  overflow: hidden;
+}
+.custom-file-label {
+  white-space: nowrap;
+}
+
+.button {
+  padding:5px;
+  cursor:pointer;
+  background:grey;
+  color:white;
+  width:25px;
+  height:auto;
+  text-align:center;
+  display:inline-block;
+ }
+ 
+ .button:hover {
+ background:black;
+ }
+
+.btn-circle {
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  padding: 6px 0;
+  font-size: 12px;
+  line-height: 1.428571429;
+  border-radius: 15px;
+}
+
+.btn-circle.btn-lg {
+  width: 50px;
+  height: 50px;
+  padding: 10px 16px;
+  font-size: 18px;
+  line-height: 1.33;
+  border-radius: 10px;
+}
+
+.btn-circle.btn-xl {
+  width: 70px;
+  height: 70px;
+  padding: 10px 16px;
+  font-size: 24px;
+  line-height: 1.33;
+  border-radius: 35px;
+}
