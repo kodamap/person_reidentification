@@ -97,7 +97,7 @@ optional arguments:
 **example1.** camera streaming without person counter 
 
 ```sh
-python app.py -i cam --no_v4l
+python app.py -i cam
 ```
 
 **example2** Specify video file with person counter
