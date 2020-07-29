@@ -87,18 +87,15 @@ class Detections(Detectors):
         xmin, ymin, xmax, ymax = box
         size = cv2.getTextSize(result, cv2.FONT_HERSHEY_SIMPLEX, 0.4, 1)
         xtext = xmin + size[0][0] + 20
-        """
         cv2.rectangle(
             frame, (xmin, ymin - 22), (xtext, ymin), green, -1,
         )
         cv2.rectangle(
             frame, (xmin, ymin - 22), (xtext, ymin), green,
         )
-        """
         cv2.rectangle(
             frame, (xmin, ymin), (xmax, ymax), green, 1,
         )
-        """
         cv2.putText(
             frame,
             result,
@@ -108,7 +105,6 @@ class Detections(Detectors):
             (0, 0, 0),
             1,
         )
-        """
         return frame
 
     def draw_perf_stats(
