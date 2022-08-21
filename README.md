@@ -1,14 +1,14 @@
 <!-- TOC -->
 
 - [Person Re-identification with OpenVINO](#person-re-identification-with-openvino)
-    - [What's this](#whats-this)
-    - [Reference](#reference)
-        - [OpenVINO Toolkit and Flask Video streaming](#openvino-toolkit-and-flask-video-streaming)
-        - [OpenVINO Intel Model](#openvino-intel-model)
-    - [Tested Environment](#tested-environment)
-    - [Required Python packages](#required-python-packages)
-    - [How to use](#how-to-use)
-    - [Run app](#run-app)
+  - [What's this](#whats-this)
+  - [Reference](#reference)
+    - [OpenVINO Toolkit and Flask Video streaming](#openvino-toolkit-and-flask-video-streaming)
+    - [OpenVINO Intel Model](#openvino-intel-model)
+  - [Tested Environment](#tested-environment)
+  - [Required Python packages](#required-python-packages)
+  - [How to use](#how-to-use)
+  - [Run app](#run-app)
 
 <!-- /TOC -->
 
@@ -50,11 +50,11 @@ You can do followings:
 
 - Python 3.7.6 (need 3.6+ for f-strings)
 - Windows 10 [Version 10.0.19041.388]
-- OpenVINO Toolkit 2020.1+[^1]
+- OpenVINO Toolkit 2020.1 ~ 2021.4[^1]
 
 [^1]: openvino.inference_engine version openvino_2020.1.033 or above build does not need cpu extension.
-    # https://software.intel.com/en-us/forums/intel-distribution-of-openvino-toolkit/topic/848825
-
+      https://community.intel.com/t5/Intel-Distribution-of-OpenVINO/CPU-extension-file-missing/m-p/1177716
+      
 
 ## Required Python packages
 

@@ -1,16 +1,20 @@
 import cv2
 import os
 import sys
-from logging import getLogger, basicConfig, DEBUG, INFO
+from logging import getLogger
 
-from openvino.inference_engine import IENetwork, IECore, IEPlugin, get_version
-from timeit import default_timer as timer
+from openvino.inference_engine import IECore
+
+# OpenVINO 2021: The IEPlugin class is deprecated
+try:
+    from openvino.inference_engine import IEPlugin
+except ImportError:
+    pass
+from openvino.inference_engine import get_version
+
 import numpy as np
 
 logger = getLogger(__name__)
-basicConfig(
-    level=INFO, format="%(asctime)s %(levelname)s %(name)s %(funcName)s(): %(message)s"
-)
 
 is_myriad_plugin_initialized = False
 myriad_plugin = None
@@ -51,21 +55,28 @@ class BaseDetection(object):
         logger.info(
             f"Loading {device} model to the {detection_of} plugin... version:{get_version()}"
         )
-        if device == "MYRIAD" and not is_myriad_plugin_initialized:
-            # To prevent MYRIAD Plugin from initializing failed, use IEPlugin Class which is deprecated
-            # "RuntimeError: Can not init Myriad device: NC_ERROR"
-            self.plugin = IEPlugin(device=device, plugin_dirs=None)
-            self.exec_net = self.plugin.load(network=net, num_requests=2)
-            is_myriad_plugin_initialized = True
-            myriad_plugin = self.plugin
-        elif device == "MYRIAD" and is_myriad_plugin_initialized:
-            logger.info(f"device plugin for {device} already initialized")
-            self.plugin = myriad_plugin
-            self.exec_net = self.plugin.load(network=net, num_requests=2)
-        else:
+        # Example: version: 2021.4.2-3974-e2a469a3450-releases/2021/4
+        # The IEPlugin class is deprecated
+        if str(get_version().split("-")[0]) > "2021":
             self.exec_net = self.ie.load_network(
                 network=net, device_name=device, num_requests=2
             )
+        else:
+            if device == "MYRIAD" and not is_myriad_plugin_initialized:
+                # To prevent MYRIAD Plugin from initializing failed, use IEPlugin Class which is deprecated
+                # "RuntimeError: Can not init Myriad device: NC_ERROR"
+                self.plugin = IEPlugin(device=device, plugin_dirs=None)
+                self.exec_net = self.plugin.load(network=net, num_requests=2)
+                is_myriad_plugin_initialized = True
+                myriad_plugin = self.plugin
+            elif device == "MYRIAD" and is_myriad_plugin_initialized:
+                logger.info(f"device plugin for {device} already initialized")
+                self.plugin = myriad_plugin
+                self.exec_net = self.plugin.load(network=net, num_requests=2)
+            else:
+                self.exec_net = self.ie.load_network(
+                    network=net, device_name=device, num_requests=2
+                )
 
         self.input_dims = net.input_info[self.input_blob].input_data.shape
         self.output_dims = net.outputs[self.out_blob].shape
@@ -86,11 +97,11 @@ class PersonDetection(BaseDetection):
         n, c, h, w = self.input_dims
 
         if is_async:
-            logger.debug(
-                "*** start_async *** cur_req_id:{} next_req_id:{} async:{}".format(
-                    self.cur_request_id, self.next_request_id, is_async
-                )
-            )
+            # logger.debug(
+            #    "*** start_async *** cur_req_id:{} next_req_id:{} async:{}".format(
+            #        self.cur_request_id, self.next_request_id, is_async
+            #    )
+            # )
             in_frame = cv2.resize(next_frame, (w, h))
             # Change data layout from HWC to CHW
             in_frame = in_frame.transpose((2, 0, 1))
@@ -99,11 +110,11 @@ class PersonDetection(BaseDetection):
                 request_id=self.next_request_id, inputs={self.input_blob: in_frame}
             )
         else:
-            logger.debug(
-                "*** start_sync *** cur_req_id:{} next_req_id:{} async:{}".format(
-                    self.cur_request_id, self.next_request_id, is_async
-                )
-            )
+            # logger.debug(
+            #    "*** start_sync *** cur_req_id:{} next_req_id:{} async:{}".format(
+            #        self.cur_request_id, self.next_request_id, is_async
+            #    )
+            # )
             self.exec_net.requests[self.cur_request_id].wait(-1)
             in_frame = cv2.resize(frame, (w, h))
             # Change data layout from HWC to CHW
