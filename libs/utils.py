@@ -12,13 +12,14 @@ def get_person_frames(persons, frame):
     for person_id, person in enumerate(persons[0][0]):
         box = person[3:7] * np.array([frame_w, frame_h, frame_w, frame_h])
         (xmin, ymin, xmax, ymax) = box.astype("int")
-        boxes.append((xmin, ymin, xmax, ymax))
         person_frame = frame[ymin:ymax, xmin:xmax]
         person_h, person_w = person_frame.shape[:2]
         # Resizing person_frame will be failed when witdh or height of the person_fame is 0
         # ex. (243, 0, 3)
         if person_h != 0 and person_w != 0:
+            boxes.append((xmin, ymin, xmax, ymax))
             person_frames.append(person_frame)
+
     return person_frames, boxes
 
 
