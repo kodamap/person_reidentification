@@ -1,30 +1,23 @@
 $(function () {
 
-    const detection_cmd = ['async', 'sync', 'person-det', 'person-reid'];
+    const detection_cmd = ['async', 'sync', 'person_det', 'person_reid', 'show_track'];
 
     $.ajaxSetup({ cache: false });
 
-    // flip frame
-    $('#flip').on('click', function () {
-        let command = JSON.stringify({ "command": "flip" });
-        post('/flip', command);
-    });
-
     // post detection action
     $('.btn').on('click', function (e) {
-
         var command = JSON.stringify({ "command": $('#' + $(this).attr('id')).val() });
 
         if (JSON.parse(command).command == "") {
             var command = JSON.stringify({ "command": $(this).find('input').val() });
         }
-
         //console.log("btn", command)
-
         if (detection_cmd.includes(JSON.parse(command).command)) {
             post('/detection', command);
         }
-
+        if (JSON.parse(command).command == 'flip') {
+            post('/flip', command);
+        }
     });
 
     // ajax post
@@ -37,8 +30,6 @@ $(function () {
             timeout: 10000
         }).done(function (data, textStatus) {
             let post_command = JSON.parse(command).command;
-            let is_async = JSON.parse(data.ResultSet).is_async;
-            let flip_code = JSON.parse(data.ResultSet).flip_code;
             let is_det = JSON.parse(data.ResultSet).is_det;
             let is_reid = JSON.parse(data.ResultSet).is_reid;
 
@@ -66,8 +57,8 @@ $(function () {
 
             if (is_reid && post_command == "person-reid") {
                 $('#video_feed').fadeIn(100);
-                $("#person-reid").attr('class', 'btn btn-secondary active');
                 $("#person-det").attr('class', 'btn btn-secondary');
+                $("#person-reid").attr('class', 'btn btn-secondary active');
             } else if (!is_reid) {
                 $("#person-reid").attr('class', 'btn btn-secondary');
             }

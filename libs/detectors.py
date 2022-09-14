@@ -22,10 +22,6 @@ myriad_plugin = None
 
 class BaseDetection(object):
     def __init__(self, device, model_xml, detection_of):
-        """MYRIAD device's plugin should be initialized only once, 
-        MYRIAD plugin would be failed when creating exec_net 
-        RuntimeError: Can not init Myriad device: NC_ERROR
-        """
 
         self.ie = IECore()
         model_bin = os.path.splitext(model_xml)[0] + ".bin"
@@ -35,6 +31,10 @@ class BaseDetection(object):
         self._load_ir_to_plugin(device, net, detection_of)
 
     def _load_ir_to_plugin(self, device, net, detection_of):
+        """MYRIAD device's plugin should be initialized only once, 
+        MYRIAD plugin would be failed when creating exec_net 
+        RuntimeError: Can not init Myriad device: NC_ERROR
+        """
 
         global is_myriad_plugin_initialized
         global myriad_plugin
@@ -97,11 +97,6 @@ class PersonDetection(BaseDetection):
         n, c, h, w = self.input_dims
 
         if is_async:
-            # logger.debug(
-            #    "*** start_async *** cur_req_id:{} next_req_id:{} async:{}".format(
-            #        self.cur_request_id, self.next_request_id, is_async
-            #    )
-            # )
             in_frame = cv2.resize(next_frame, (w, h))
             # Change data layout from HWC to CHW
             in_frame = in_frame.transpose((2, 0, 1))
@@ -110,11 +105,6 @@ class PersonDetection(BaseDetection):
                 request_id=self.next_request_id, inputs={self.input_blob: in_frame}
             )
         else:
-            # logger.debug(
-            #    "*** start_sync *** cur_req_id:{} next_req_id:{} async:{}".format(
-            #        self.cur_request_id, self.next_request_id, is_async
-            #    )
-            # )
             self.exec_net.requests[self.cur_request_id].wait(-1)
             in_frame = cv2.resize(frame, (w, h))
             # Change data layout from HWC to CHW

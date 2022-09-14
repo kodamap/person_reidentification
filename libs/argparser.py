@@ -31,19 +31,13 @@ def build_argparser():
         "--v4l", help="cv2.VideoCapture with cv2.CAP_V4L", action="store_true"
     )
     parser.add_argument(
-        "-ax",
-        "--axis",
-        help="Specify the axis when counting person horizontally or vertically (0: count horizontally(x-axis) , 1: count vertically (y-axis)",
+        "-g",
+        "--grid",
         default=0,
-        choices=[0, 1],
+        help="Specify how many grid to divide frame. This is used to define boundary area when the tracker counts person. 0 ~ 2 means not counting person. (range: 3 < max_grid)",
         type=int,
     )
     parser.add_argument(
-        "-g",
-        "--grid",
-        help="Specify how many grid to divide frame. This is used to define boundary area when the tracker counts person. 0 ~ 2 means not counting person. (range: 3 < max_grid)",
-        default=0,
-        type=int,
+        "-v", "--verbose", help="set logging level Debug", action="store_true"
     )
-
     return parser

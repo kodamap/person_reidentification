@@ -3,18 +3,10 @@ https://github.com/ECI-Robotics/opencv_remote_streaming_processing/
 """
 
 import cv2
-import numpy as np
-import math
 import os
-import sys
-from logging import getLogger, basicConfig, DEBUG, INFO, ERROR
-from timeit import default_timer as timer
+from logging import getLogger
 
 logger = getLogger(__name__)
-
-basicConfig(
-    level=INFO, format="%(asctime)s %(levelname)s %(name)s %(funcName)s(): %(message)s"
-)
 
 
 class VideoCamera:
@@ -27,7 +19,8 @@ class VideoCamera:
                 self.cap = cv2.VideoCapture(self.input_stream, cv2.CAP_V4L)
             else:
                 self.cap = cv2.VideoCapture(self.input_stream)
-                ##self.cap = cv2.VideoCapture("http://172.25.250.212:8081/")
+                # for streaming
+                ##self.cap = cv2.VideoCapture("http://ipaddress:port/")
         else:
             self.input_stream = input
             assert os.path.isfile(input), "Specified input file doesn't exist"
@@ -63,6 +56,10 @@ class VideoCamera:
     def get_frame(self, flip_code):
 
         ret, frame = self.cap.read()
+
+        if frame is None:
+            return frame
+
         if frame.shape[0] > self.resize_width:
             scale = self.resize_width / frame.shape[1]
             frame = cv2.resize(frame, dsize=None, fx=scale, fy=scale)

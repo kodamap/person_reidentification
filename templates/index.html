@@ -27,11 +27,16 @@
       <div class="col-lg-12">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <label id="person-det" class="btn btn-secondary">
-            <input type="radio" value="person-det" autocomplete="off">Person Detection
+            <input type="radio" value="person_det" autocomplete="off">Person Detection
           </label>
           <label id="person-reid" class="btn btn-secondary">
-            <input type="radio" value="person-reid" autocomplete="off">Re-Identification
+            <input type="radio" value="person_reid" autocomplete="off">Re-Identification
           </label>
+        </div>
+        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+          <button type="button" class="btn btn-success" data-toggle="tooltip" data-placement="right" id="show_track"
+            value="show_track" title="show track points(Re-Identification)">
+            <i class="fas fa-tractor"></i></button>
         </div>
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
           {% if is_async %}
@@ -49,7 +54,7 @@
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
           <button type="button" class="btn btn-second" data-toggle="tooltip" data-placement="bottom"
             aria-pressed="false" autocomplete="off" id="flip" value="flip"
-            title="flip frame x-axis > y-axis > both > reset">
+            title="flip frame x-axis > y-axis > both > reset (webcam)">
             <i class="fas fa-video"></i></button>
         </div>
       </div>
@@ -65,6 +70,7 @@
       </div>
     </div>
 
+
     <div class="row justify-content-center">
       <div class=" col-xs-3">
       </div>
@@ -79,7 +85,7 @@
 
   <script src="/static/js/popper.js">
   </script>
-  <script src="/static/js/jquery-3.3.1.min.js"></script>
+  <script src="/static/js/jquery-3.6.1.min.js"></script>
   <script src="/static/js/bootstrap.min.js"></script>
   <script src="/static/js/detectors.js"></script>
   <script src="/static/js/all.min.js"></script>

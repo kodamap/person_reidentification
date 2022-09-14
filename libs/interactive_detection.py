@@ -1,18 +1,12 @@
-from logging import getLogger, basicConfig, DEBUG, INFO
-import os
-import sys
+from logging import getLogger
 import cv2
 import numpy as np
 from timeit import default_timer as timer
 from libs.tracker import Tracker
-from libs.utils import get_person_frames
 import libs.detectors as detectors
 import configparser
 
 logger = getLogger(__name__)
-basicConfig(
-    level=INFO, format="%(asctime)s %(levelname)s %(name)s %(funcName)s(): %(message)s"
-)
 
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -56,7 +50,7 @@ class Detectors:
 
 
 class Detections(Detectors):
-    def __init__(self, frame, devices, axis, grid):
+    def __init__(self, frame, devices, grid):
         super().__init__(devices)
 
         # initialize Calculate FPS
@@ -65,23 +59,20 @@ class Detections(Detectors):
         self.fps = "FPS: ??"
         self.prev_time = timer()
         self.prev_frame = frame
-
         # create tracker instance
-        self.tracker = Tracker(self.person_id_detector, frame, axis, grid,)
+        self.tracker = Tracker(self.person_id_detector, frame, grid)
 
     def _calc_fps(self):
         curr_time = timer()
         exec_time = curr_time - self.prev_time
         self.prev_time = curr_time
         self.accum_time = self.accum_time + exec_time
-        self.curr_fps = self.curr_fps + 1
+        self.curr_fps += 1
 
         if self.accum_time > 1:
-            self.accum_time = self.accum_time - 1
+            self.accum_time += -1
             self.fps = "FPS: " + str(self.curr_fps)
             self.curr_fps = 0
-
-        return self.fps
 
     def draw_bbox(self, frame, box, result, color):
         xmin, ymin, xmax, ymax = box
@@ -108,17 +99,17 @@ class Detections(Detectors):
         return frame
 
     def draw_perf_stats(
-        self, det_time, det_time_txt, frame, is_async, person_counter=None
+        self, det_time, det_time_txt, frame, frame_id, is_async, person_counter=None
     ):
 
         # Draw FPS on top right corner
-        fps = self._calc_fps()
+        self._calc_fps()
         cv2.rectangle(
             frame, (frame.shape[1] - 50, 0), (frame.shape[1], 17), (255, 255, 255), -1
         )
         cv2.putText(
             frame,
-            fps,
+            self.fps,
             (frame.shape[1] - 50 + 3, 10),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.35,
@@ -136,13 +127,31 @@ class Detections(Detectors):
             )
             cv2.putText(
                 frame,
-                f"CNT: {person_counter}",
+                f"DET: {person_counter}",
                 (frame.shape[1] - 50 + 3, 27),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.35,
                 (0, 0, 0),
                 1,
             )
+
+        # Draw Frame number at bottom corner
+        cv2.rectangle(
+            frame,
+            (frame.shape[1] - 50, frame.shape[0] - 20),
+            (frame.shape[1], frame.shape[0]),
+            (255, 255, 255),
+            -1,
+        )
+        cv2.putText(
+            frame,
+            frame_id.zfill(5),
+            (frame.shape[1] - 40, frame.shape[0] - 10),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.35,
+            (0, 0, 0),
+            1,
+        )
 
         # Draw performance stats
         if is_async:
@@ -163,12 +172,12 @@ class Detections(Detectors):
             1,
         )
         if det_time_txt:
-            inf_time_message_each = (
+            inf_time_message = (
                 f"@Detection prob:{prob_thld_person} time: {det_time_txt}"
             )
             cv2.putText(
                 frame,
-                inf_time_message_each,
+                inf_time_message,
                 (10, 30),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.4,
@@ -177,11 +186,29 @@ class Detections(Detectors):
             )
         return frame
 
-    def person_detection(self, frame, is_async, is_det, is_reid):
+    def get_person_frames(self, persons, frame):
 
-        logger.debug(
-            "is_async:{}, is_det:{}, is_reid:{}".format(is_async, is_det, is_reid)
-        )
+        frame_h, frame_w = frame.shape[:2]
+        person_frames = []
+        boxes = []
+
+        for person in persons[0][0]:
+            box = person[3:7] * np.array([frame_w, frame_h, frame_w, frame_h])
+            xmin, ymin, xmax, ymax = box.astype("int")
+            person_frame = frame[ymin:ymax, xmin:xmax]
+            person_h, person_w = person_frame.shape[:2]
+            # Resizing person_frame will be failed when witdh or height of the person_fame is 0
+            # ex. (243, 0, 3)
+            if person_h != 0 and person_w != 0:
+                boxes.append((xmin, ymin, xmax, ymax))
+                person_frames.append(person_frame)
+
+        return person_frames, boxes
+
+    def person_detection(self, frame, is_async, is_det, is_reid, frame_id, show_track):
+        # Give the frame_id with tracker instance
+        self.tracker.frame_id = frame_id
+        self.tracker.show_track = show_track
 
         # init params
         det_time = 0
@@ -195,7 +222,7 @@ class Detections(Detectors):
         # just return frame when person detection and person reidentification are False
         if not is_det and not is_reid:
             self.prev_frame = self.draw_perf_stats(
-                det_time, "Video capture mode", frame, is_async
+                det_time, "Video capture mode", frame, frame_id, is_async
             )
             return self.prev_frame
 
@@ -214,18 +241,18 @@ class Detections(Detectors):
             det_time_det = inf_end - inf_start
             det_time_txt = f"person det:{det_time_det * 1000:.3f} ms "
 
-            if persons is not None:
-                person_frames, boxes = get_person_frames(persons, self.prev_frame)
-                person_counter = len(person_frames)
+            if persons is None:
+                return self.prev_frame
+
+            person_frames, boxes = self.get_person_frames(persons, self.prev_frame)
+            person_counter = len(person_frames)
 
             if is_det and person_frames:
                 # ----------- Draw result into the frame ---------- #
                 for det_id, person_frame in enumerate(person_frames):
                     confidence = round(persons[0][0][det_id][2] * 100, 1)
                     result = f"{det_id} {confidence}%"
-                    logger.debug(f"det_id:{det_id} confidence:{confidence}%")
                     # draw bounding box per each person into the frame
-                    xmin, ymin, xmax, ymax = boxes[det_id]
                     self.prev_frame = self.draw_bbox(
                         self.prev_frame, boxes[det_id], result, green
                     )
@@ -234,7 +261,7 @@ class Detections(Detectors):
             if is_reid:
                 inf_start = timer()
                 self.prev_frame = self.tracker.person_reidentification(
-                    self.prev_frame, persons, person_frames, boxes
+                    self.prev_frame, person_frames, boxes
                 )
                 inf_end = timer()
                 det_time_reid = inf_end - inf_start
@@ -248,6 +275,7 @@ class Detections(Detectors):
             det_time,
             det_time_txt,
             self.prev_frame,
+            frame_id,
             is_async,
             person_counter=str(person_counter),
         )

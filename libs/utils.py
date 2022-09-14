@@ -1,26 +1,7 @@
 import numpy as np
 import cv2
 import traceback
-
-
-def get_person_frames(persons, frame):
-
-    frame_h, frame_w = frame.shape[:2]
-    person_frames = []
-    boxes = []
-
-    for person_id, person in enumerate(persons[0][0]):
-        box = person[3:7] * np.array([frame_w, frame_h, frame_w, frame_h])
-        (xmin, ymin, xmax, ymax) = box.astype("int")
-        person_frame = frame[ymin:ymax, xmin:xmax]
-        person_h, person_w = person_frame.shape[:2]
-        # Resizing person_frame will be failed when witdh or height of the person_fame is 0
-        # ex. (243, 0, 3)
-        if person_h != 0 and person_w != 0:
-            boxes.append((xmin, ymin, xmax, ymax))
-            person_frames.append(person_frame)
-
-    return person_frames, boxes
+from scipy.spatial import distance
 
 
 def resize_frame(frame, height):
@@ -46,14 +27,31 @@ def cos_similarity(X, Y):
     )
 
 
-def get_distance(x, Y):
+def get_euclidean_distance(x, Y):
     # input x: (1, 2)  center coordinate of a person frame
-    #       Y: (m, 2)  center coordinate of the other person frames
+    #      Y: (m, 2)  center coordinate of the other person frames
     # output : (m,)
-    return np.abs(np.linalg.norm(x - Y, axis=1))
+    return np.linalg.norm(x - Y, axis=1)
 
 
-def get_iou(box1, box2):
+def get_iou2(box, boxes):
+    # Input   box  : ndarray (1, 4)
+    #         boxes: ndarray (m, 4)
+    # Output: Iou  : ndarray (m,)
+    ximin = np.maximum(box[0], boxes[:, 0])
+    yimin = np.maximum(box[1], boxes[:, 1])
+    ximax = np.minimum(box[2], boxes[:, 2])
+    yimax = np.minimum(box[3], boxes[:, 3])
+    inter_width = ximax - ximin
+    inter_height = yimax - yimin
+    inter_area = np.maximum(inter_width, 0) * np.maximum(inter_height, 0)
+    box_ = (box[2] - box[0]) * (box[3] - box[1])
+    boxes_ = (boxes[:, 2] - boxes[:, 0]) * (boxes[0:, 3] - boxes[0:, 1])
+    union_area = box_ + boxes_ - inter_area
+    return inter_area / union_area
+
+
+def get_iou(box1: tuple, box2: tuple) -> float:
     # box: (xmin, ymin, xmax, ymax)
     # (xmin, ymin) : top left corner of the bounding box
     # (xmin, ymin) : bottom right corner of the bounding box
@@ -71,3 +69,38 @@ def get_iou(box1, box2):
     union_area = box1_ + box2_ - inter_area
     return inter_area / union_area
 
+
+def get_mahalanobis_distance(center, track_points):
+    cov = np.cov(track_points.T)
+    return distance.mahalanobis(track_points[-1], center, np.linalg.pinv(cov))
+
+
+def affine_translation(box: tuple, top_left: tuple = (0, 0)) -> tuple:
+    translation_matrix = np.eye(3)
+    x = box[0] - top_left[0]
+    y = box[1] - top_left[1]
+
+    translation_matrix[0][2] = -1 * x
+    translation_matrix[1][2] = -1 * y
+    xmin, ymin, xmax, ymax = box
+    min = np.array([xmin, ymin, 1]).reshape(3, 1)
+    max = np.array([xmax, ymax, 1]).reshape(3, 1)
+    min = translation_matrix @ min
+    max = translation_matrix @ max
+    return min[0][0], min[1][0], max[0][0], max[1][0]
+
+
+def get_standard_deviation(x: list) -> tuple:
+    mean = np.mean(x)
+    # std = np.sqrt(np.sum((x - mean) ** 2) / len(x))
+    std = np.std(x)
+    return mean, std
+
+
+def get_box_coordinates(prev_box, center) -> tuple:
+    box_w, box_h = prev_box[2] - prev_box[0], prev_box[3] - prev_box[1]
+    xmin = center[0] - (box_w / 2)
+    ymin = center[1] - (box_h / 2)
+    xmax = xmin + box_w
+    ymax = ymin + box_h
+    return xmin, ymin, xmax, ymax
