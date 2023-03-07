@@ -48,9 +48,9 @@ This is Person Identification Test App using Intel OpenVINO Person Re-Identifica
 
 ## Tested Environment
 
-- Python 3.7.6 (need 3.6+ for f-strings)
-- Windows 10 [Version 10.0.19041.388]
-- OpenVINO Toolkit 2020.1 ~ 2021.4[^1]
+- Python 3.9.13
+- Windows 11 22H2
+- OpenVINO Toolkit 2022.1 ~ 2022.3
 
 [^1]: openvino.inference_engine version openvino_2020.1.033 or above build does not need cpu extension.
       https://community.intel.com/t5/Intel-Distribution-of-OpenVINO/CPU-extension-file-missing/m-p/1177716

@@ -15,7 +15,7 @@ def build_argparser():
         "--device",
         help="Specify the target device for Person Detection to infer on; CPU, GPU, FPGA or MYRIAD is acceptable.",
         default="CPU",
-        choices=["CPU", "GPU", "FPGA", "MYRIAD"],
+        choices=["CPU", "GPU", "FPGA", "MYRIAD", "AUTO"],
         type=str,
     )
     parser.add_argument(

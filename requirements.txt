@@ -1,4 +1,5 @@
-Flask==1.0.3
-opencv-python==4.2.0.32
-munkres
-scipy
+Flask==2.2.3
+opencv-python==4.7.0.72
+munkres==1.1.4
+scipy==1.10.1
+numpy==1.23
